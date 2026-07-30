@@ -1,0 +1,62 @@
+<div style="padding: 20px; font-family: Arial, sans-serif;">
+  <h2>Gestión de Ítems (CRUD Angular + Spring)</h2>
+
+  <!-- Formulario de registro/edición dinámico -->
+  <div style="margin-bottom: 30px; padding: 15px; border: 1px solid #ccc; max-width: 400px;">
+    <h3>{{ isEditing() ? 'Editar Ítem' : 'Agregar Nuevo Ítem' }}</h3>
+    
+    <div style="margin-bottom: 10px;">
+      <label>Nombre:</label><br>
+      <input type="text" [(ngModel)]="newItem().name" style="width: 100%;">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label>Descripción:</label><br>
+      <input type="text" [(ngModel)]="newItem().description" style="width: 100%;">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label>Cantidad:</label><br>
+      <input type="number" [(ngModel)]="newItem().quantity" style="width: 100%;">
+    </div>
+
+    <button (click)="saveItem()" [style.background-color]="isEditing() ? '#007bff' : 'green'" style="color: white; padding: 8px 12px; border: none; cursor: pointer;">
+      {{ isEditing() ? 'Actualizar Ítem' : 'Guardar Ítem' }}
+    </button>
+    
+    <button *ngIf="isEditing()" (click)="cancelEdit()" style="background-color: #6c757d; color: white; padding: 8px 12px; border: none; cursor: pointer; margin-left: 5px;">
+      Cancelar
+    </button>
+  </div>
+
+  <!-- Tabla de visualización -->
+  <h3>Lista de Ítems</h3>
+  <table border="1" cellpadding="10" cellspacing="0" style="width: 100%; border-collapse: collapse; text-align: left;">
+    <thead style="background-color: #f2f2f2;">
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Descripción</th>
+        <th>Cantidad</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of items">
+        <td>{{ item.id }}</td>
+        <td>{{ item.name }}</td>
+        <td>{{ item.description }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>
+          <button (click)="editItem(item)" style="background-color: #ffc107; color: black; border: none; padding: 5px 10px; cursor: pointer; margin-right: 5px;">
+            Editar
+          </button>
+          <button (click)="deleteItem(item.id!)" style="background-color: red; color: white; border: none; padding: 5px 10px; cursor: pointer;">
+            Eliminar
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="items.length === 0">
+        <td colspan="5" style="text-align: center; color: gray;">No hay ítems registrados en la base de datos.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

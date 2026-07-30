@@ -1,0 +1,151 @@
+<main class="main-layout">
+
+  <!-- PANTALLA A: Si el jugador no se ha registrado, pide su nombre -->
+  @if (!username()) {
+    <mat-card class="trivia-card" appearance="raised">
+      <mat-card-header>
+        <mat-card-title class="mat-headline-small">Welcome to Live Trivia!</mat-card-title>
+        <mat-card-subtitle>Enter your nickname to join the live match</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content style="margin-top: 20px; display: flex; flex-direction: column; gap: 16px;">
+        <!-- Input nativo o de Material para escribir el alias -->
+        <input 
+          #nameInput
+          type="text" 
+          placeholder="e.g., Player_One" 
+          style="padding: 16px; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem;">
+        
+        <button 
+          mat-flat-button 
+          color="primary" 
+          style="padding: 24px;"
+          (click)="joinGame(nameInput.value)">
+          Join Live Lobby
+        </button>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @else {
+     <!-- PANTALLA B: Si el juego terminó, muestra UNICAMENTE los resultados finales -->
+            <!-- SCREEN B: Game Over Final Results Screen without ICU confusion -->
+     @if (showResults()) {
+      <mat-card class="trivia-card" appearance="raised">
+        <mat-card-header>
+          <div mat-card-avatar class="trivia-avatar-icon">
+            <mat-icon color="primary">emoji_events</mat-icon>
+          </div>
+          <mat-card-title class="mat-headline-small">Match Complete!</mat-card-title>
+          <mat-card-subtitle class="mat-body-medium">Performance Report</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content style="padding-top: 16px; display: flex; flex-direction: column; gap: 16px;">
+          <!-- Celebration Banner -->
+          <div class="material-alert-banner banner-success">
+            <mat-icon color="primary">stars</mat-icon>
+            <span class="mat-body-large">Match completed, {{ username() }}!</span>
+          </div>
+
+          <!-- MULTIPLAYER ARRAY MATCHER -->
+          @if (gameResults(); as playerList) {
+            @for (player of playerList; track player.username) {
+                <div class="player-row-card" 
+                     [style.background]="player.username === username() ? '#e3f2fd' : '#f5f5f5'"
+                     style="padding: 16px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; border: 1px solid #e0e0e0;">
+                  
+                  <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 6px;">
+                    <span class="mat-title-small" style="font-weight: bold; display: flex; align-items: center; gap: 6px;">
+                      <mat-icon color="primary" style="font-size: 20px; width: 20px; height: 20px;">
+                        {{ player.username === username() ? 'person' : 'groups' }}
+                      </mat-icon>
+                        {{ player.username }} 
+                      @if (player.username === username()) { <span style="font-size: 0.75rem; color: #1976d2;">(You)</span> }
+                    </span>
+                    <span class="mat-body-small" style="color: #666; font-weight: 500;">
+                      Answered: {{ player.history.length }} / 5
+                    </span>
+                  </div>
+
+                  <!-- Player Metrics Grid -->
+                  <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 4px;">
+                    <div>
+                      <span class="mat-body-small" style="color: #4caf50; font-weight: bold; margin-right: 4px;">Success:</span>
+                      <span class="mat-body-medium" style="font-weight: bold;">{{ player.successRate }}%</span>
+                    </div>
+                    <div>
+                      <span class="mat-body-small" style="color: #f44336; font-weight: bold; margin-right: 4px;">Errors:</span>
+                      <span class="mat-body-medium" style="font-weight: bold;">{{ player.errorRate }}%</span>
+                    </div>
+                  </div>
+                </div>
+              }
+          } @else {
+            <p class="mat-body-medium" style="text-align: center; color: #666;">Extracting scores from match server...</p>
+          }
+     
+        </mat-card-content>
+
+          <mat-card-actions class="card-action-bar-footer" style="justify-content: center; padding: 16px;">
+          <button mat-flat-button color="primary" (click)="restartGame()" style="padding: 0 24px;">
+            <mat-icon>replay</mat-icon>
+            Play Another Match
+          </button>
+        </mat-card-actions>
+
+      </mat-card>
+    }
+    @else {
+      <!-- PANTALLA C: Si la partida sigue activa, muestra la pregunta actual de forma continua -->
+      @if (triviaQuestion(); as question) {
+        <!-- Material Card Elevation Level 3 -->
+        <mat-card class="trivia-card" appearance="raised">
+          
+          <mat-card-header>
+            <div mat-card-avatar class="trivia-avatar-icon">
+              <mat-icon color="primary">quiz</mat-icon>
+            </div>
+              <mat-card-title class="mat-headline-small">Player: {{ username() }}</mat-card-title>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <p class="question-body-text mat-headline-medium">{{ question.question }}</p>
+            
+            <!-- Native Material Layout Grid Container -->
+            <div class="options-grid-layout">
+              @for (option of question.options; track option) {
+                <!-- mat-flat-button creates a bold modern filled button block -->
+                <button 
+                  mat-flat-button 
+                  color="primary"
+                  matRipple
+                  (click)="submitAnswer(option)" 
+                  [disabled]="timeLeft() === 0 || gameFeedback() !== ''" 
+                  class="extended-trivia-btn">
+                  {{ option }}
+                </button>
+              }
+            </div>
+            
+            <!-- Dynamic Contextual Status Alert Messages -->
+            @if (gameFeedback()) {
+              <div class="material-alert-banner" [class.banner-success]="gameFeedback().includes('🎉')">
+                <mat-icon color="{{ gameFeedback().includes('🎉') ? 'primary' : 'warn' }}">
+                  {{ gameFeedback().includes('🎉') ? 'stars' : 'gpp_bad' }}
+                </mat-icon>
+                <span class="mat-body-medium">{{ gameFeedback() }}</span>
+              </div>
+            }
+          </mat-card-content>
+          
+          <mat-card-actions class="card-action-bar-footer">
+            <!-- Visual Danger Context Mapping using theme color properties -->
+            <div class="live-countdown-timer" [class.color-critical-danger]="timeLeft() <= 7 && timeLeft() > 0">
+              <mat-icon class="timer-icon-spinning">schedule</mat-icon>
+              <span class="mat-label-large">Time Left: {{ timeLeft() }}s</span>
+            </div>
+          </mat-card-actions>
+        </mat-card>
+      }
+    } }
+</main>

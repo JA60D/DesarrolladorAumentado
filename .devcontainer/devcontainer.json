@@ -1,0 +1,30 @@
+// For format details, see https://aka.ms/devcontainer.json.
+{
+  "name": "Java + Angular Dev Container",
+  "image": "mcr.microsoft.com/devcontainers/java:1-21-bookworm",
+
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "21",
+      "installMaven": "true",
+      "installGradle": "false"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    }
+  },
+
+  "forwardPorts": [4200, 8080],
+
+  "postCreateCommand": "bash -lc 'for d in CRUD_Front \"To-Do-Angular\" trivia_fe; do if [ -f \"$d/package.json\" ]; then cd \"$d\" && npm install && cd ..; fi; done'",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "Angular.ng-template",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  }
+}
